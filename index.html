@@ -1,0 +1,26 @@
+<html>
+<body>
+    <textarea id="text-input" rows="4" cols="50">Welcome to our application! This voice synthesis is powered by ElevenLabs.</textarea>
+    <br>
+    <button id="speak-button">Speak with ElevenLabs</button>
+
+    <script src="https://js.puter.com/v2/"></script>
+    <script>
+        document.getElementById('speak-button').addEventListener('click', () => {
+            const text = document.getElementById('text-input').value;
+            puter.ai.txt2speech(text, {
+                provider: "elevenlabs",
+                voice: "21m00Tcm4TlvDq8ikWAM",
+                model: "eleven_multilingual_v2"
+            })
+            .then(audio => {
+                audio.play();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
+
