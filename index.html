@@ -3,17 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🧞‍♂️ AI Akinator - Gemini Powered</title>
+  <title>🧞‍♂️ AI Akinator Pro - Fixed</title>
   <style>
-    /* Same beautiful CSS as before */
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; color: #333; }
     .game-container { background: white; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); max-width: 500px; width: 90%; overflow: hidden; }
     .header { background: linear-gradient(135deg, #ff6b6b, #feca57); padding: 20px; text-align: center; }
     .header h1 { font-size: 1.8rem; color: white; margin-bottom: 5px; }
     .genie { font-size: 4rem; margin-bottom: -20px; }
     .content { padding: 30px; }
-    .question { font-size: 1.3rem; font-weight: 600; margin-bottom: 25px; text-align: center; }
+    .question { font-size: 1.3rem; font-weight: 600; margin-bottom: 25px; text-align: center; line-height: 1.4; min-height: 80px; display: flex; align-items: center; justify-content: center; }
     .answers { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
     .answer-btn { padding: 15px 20px; border: none; border-radius: 12px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
     .answer-btn.yes { background: #10b981; color: white; }
@@ -21,12 +20,29 @@
     .answer-btn.probably { background: #f59e0b; color: white; }
     .answer-btn.probably-not { background: #6b7280; color: white; }
     .answer-btn.dont-know { background: #9ca3af; color: #374151; grid-column: span 2; margin-top: 10px; }
+    .answer-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.2); }
+    .answer-btn:disabled { opacity: 0.6; cursor: not-allowed; }
     .progress { height: 6px; background: #e5e7eb; border-radius: 3px; margin-bottom: 20px; overflow: hidden; }
     .progress-bar { height: 100%; background: linear-gradient(90deg, #10b981, #f59e0b); width: 0%; transition: width 0.5s; }
     .guess-section { text-align: center; display: none; }
     .character-img { width: 180px; height: 180px; border-radius: 20px; object-fit: cover; margin: 20px auto; border: 5px solid #f3f4f6; box-shadow: 0 15px 35px rgba(0,0,0,0.2); }
-    .api-status { background: #10b981; color: white; padding: 10px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-size: 0.9rem; }
-    .start-btn, .restart-btn { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 15px 30px; border: none; border-radius: 25px; font-size: 1.1rem; cursor: pointer; margin-top: 20px; }
+    .character-name { font-size: 1.5rem; font-weight: bold; margin: 15px 0; color: #1f2937; }
+    .api-status { 
+      background: linear-gradient(135deg, #10b981, #059669); 
+      color: white; padding: 12px; border-radius: 10px; 
+      margin-bottom: 20px; text-align: center; font-weight: 500;
+      box-shadow: 0 4px 15px rgba(16,185,129,0.3);
+    }
+    .start-btn, .restart-btn { 
+      background: linear-gradient(135deg, #667eea, #764ba2); 
+      color: white; padding: 15px 40px; border: none; 
+      border-radius: 30px; font-size: 1.1rem; cursor: pointer; 
+      margin: 20px 0; box-shadow: 0 10px 30px rgba(102,126,234,0.4);
+      transition: all 0.3s;
+    }
+    .start-btn:hover, .restart-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(102,126,234,0.5); }
+    .error-box { background: #fee2e2; border: 1px solid #fecaca; color: #dc2626; padding: 15px; border-radius: 10px; margin: 20px 0; }
+    @media (max-width: 480px) { .answers { grid-template-columns: 1fr; } .genie { font-size: 3rem; } }
   </style>
 </head>
 <body>
@@ -37,44 +53,54 @@
     </div>
     
     <div class="content">
-      <div class="api-status" id="api-status">
-        🔑 Gemini API Ready | 📸 Unsplash Images
-      </div>
-      
-      <div id="start-screen">
-        <h2 style="margin-bottom: 20px;">🎮 Think of Anyone Famous!</h2>
-        <p style="color: #6b7280; margin-bottom: 30px;">
-          Cricketer, Actor, Politician - Pakistani/Global<br>
-          <strong>Gemini AI</strong> will ask smart questions!
-        </p>
-        <button class="start-btn" onclick="startGame()">🚀 Start</button>
+      <div class="api-status">
+        <strong>✅ Gemini 1.5 Flash Active</strong><br>
+        📸 Real photos from <strong>Unsplash API</strong>
       </div>
 
+      <!-- Start Screen -->
+      <div id="start-screen">
+        <h2 style="margin-bottom: 20px; color: #1f2937;">🎮 Think of Famous Person!</h2>
+        <p style="color: #6b7280; margin-bottom: 30px; line-height: 1.6;">
+          Cricketer • Actor • Politician • Global Stars<br>
+          <strong>AI asks smart questions</strong> → <strong>Real photo guess</strong>
+        </p>
+        <button class="start-btn" onclick="startGame()">🚀 Start Game</button>
+      </div>
+
+      <!-- Game Screen -->
       <div id="game-screen" style="display: none;">
         <div class="progress">
           <div class="progress-bar" id="progress-bar"></div>
         </div>
-        <div class="question" id="question">Loading smart question...</div>
+        <div class="question" id="question">Loading AI question...</div>
         <div class="answers" id="answers"></div>
       </div>
 
+      <!-- Guess Screen -->
       <div id="guess-screen" class="guess-section">
-        <img id="character-img" class="character-img" src="" alt="">
-        <div id="character-name" style="font-size: 1.5rem; font-weight: bold; margin: 15px 0;"></div>
-        <p id="guess-text"></p>
-        <button class="restart-btn" onclick="startGame()">🔄 New Game</button>
+        <img id="character-img" class="character-img" src="" alt="Character">
+        <div id="character-name" class="character-name"></div>
+        <p id="guess-text" style="font-size: 1.1rem; color: #6b7280;"></p>
+        <button class="restart-btn" onclick="startGame()">🔄 Play Again</button>
+        <div style="margin-top: 20px; font-size: 0.9rem; color: #9ca3af;">
+          Questions asked: <span id="question-count">0</span> | 
+          Images: <a href="https://unsplash.com/developers" target="_blank">Unsplash API</a>
+        </div>
       </div>
     </div>
   </div>
 
   <script>
-    // ========== YOUR GEMINI API KEY ==========
-    const GEMINI_API_KEY = 'AIzaSyCYOeOvabxDDRyU4mKKoUqRh6jN8casyLA';  // ai.google.dev se lo
-    // ========================================
+    // ========== YOUR GEMINI API KEY HERE ==========
+    const GEMINI_API_KEY = 'AIzaSyD5e2sFXE0UI7A8v3dQ3Vx_ygrv9zadHrw';  
+    // Get from: https://aistudio.google.com/app/apikey
+    // ==============================================
 
     let answersHistory = [];
     let currentQuestion = '';
-    let progress = 0;
+    let questionCount = 0;
+    const MAX_QUESTIONS = 12;
 
     async function startGame() {
       document.getElementById('start-screen').style.display = 'none';
@@ -82,37 +108,76 @@
       document.getElementById('guess-screen').style.display = 'none';
       
       answersHistory = [];
-      progress = 0;
+      questionCount = 0;
+      document.getElementById('question-count').textContent = '0';
+      
       await askGeminiQuestion();
     }
 
     async function askGeminiQuestion() {
-      document.getElementById('question').textContent = '🤖 AI Thinking...';
+      const questionEl = document.getElementById('question');
+      questionEl.textContent = '🤖 AI Generating Question...';
       
+      // Disable buttons during API call
+      document.querySelectorAll('.answer-btn').forEach(btn => btn.disabled = true);
+
       try {
-        const prompt = `Akinator game. User is thinking of a famous person (cricketer/actor/politician). Previous answers: ${JSON.stringify(answersHistory.slice(-5))}. 
-        Ask ONE smart Yes/No question to narrow down. Pakistani or global famous people. Make it specific.`;
-        
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`, {
+        const context = answersHistory.slice(-4).map(a => a.split(' → ')[1] || '').join(' | ');
+        const prompt = `Akinator AI game. Think of famous person (cricketer/actor/politician - Pakistan/global).
+Previous answers: "${context}".
+Ask EXACTLY ONE Yes/No question to narrow down identity. Keep short and specific.
+Examples: "Is he a cricketer?", "Has he been Prime Minister?", "Is he alive?"`;
+
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }]
+            contents: [{
+              parts: [{ text: prompt }]
+            }],
+            generationConfig: {
+              temperature: 0.3,
+              topK: 40,
+              topP: 0.95,
+              maxOutputTokens: 30
+            }
           })
         });
-        
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`API Error ${response.status}: ${errorText.substring(0, 100)}`);
+        }
+
         const data = await response.json();
         currentQuestion = data.candidates[0].content.parts[0].text.trim();
         
-        document.getElementById('question').textContent = currentQuestion;
-        
-        renderAnswers();
-        updateProgress();
+        questionEl.textContent = `"${currentQuestion}"`;
         
       } catch (error) {
-        document.getElementById('question').textContent = 'Error: Check API key';
-        console.error('Gemini Error:', error);
+        console.error('Gemini Error Details:', error);
+        questionEl.innerHTML = `
+          <div class="error-box">
+            <strong>❌ API Connection Failed</strong><br>
+            ${error.message}<br><br>
+            <small>
+              🔧 <strong>Fix:</strong><br>
+              1. Key: <code>${GEMINI_API_KEY.substring(0, 20)}...</code><br>
+              2. <a href="https://aistudio.google.com/app/apikey" target="_blank">Regenerate Key</a><br>
+              3. Wait 2 min + refresh
+            </small>
+          </div>
+        `;
+        return;
+      } finally {
+        // Re-enable buttons
+        document.querySelectorAll('.answer-btn').forEach(btn => btn.disabled = false);
       }
+
+      renderAnswers();
+      updateProgress();
+      questionCount++;
+      document.getElementById('question-count').textContent = questionCount;
     }
 
     function renderAnswers() {
@@ -122,43 +187,48 @@
         <button class="answer-btn no" onclick="selectAnswer('No')">❌ No</button>
         <button class="answer-btn probably" onclick="selectAnswer('Probably')">🤔 Probably</button>
         <button class="answer-btn probably-not" onclick="selectAnswer('Probably not')">🤷 Probably not</button>
-        <button class="answer-btn dont-know" onclick="selectAnswer('I don\\'t know')" style="grid-column: span 2;">❓ Don't know</button>
+        <button class="answer-btn dont-know" onclick="selectAnswer('Don't know')" style="grid-column: span 2; margin-top: 10px;">❓ Don't know</button>
       `;
     }
 
     async function selectAnswer(answer) {
       answersHistory.push(`${currentQuestion} → ${answer}`);
       
-      // Next question or guess?
-      if (answersHistory.length >= 15 || answer === "I don't know") {
-        await makeFinalGuess();
-        return;
-      }
+      // Visual feedback
+      event.target.style.transform = 'scale(0.95)';
+      setTimeout(() => event.target.style.transform = '', 150);
       
-      setTimeout(askGeminiQuestion, 800);
+      if (questionCount >= MAX_QUESTIONS || answer === "Don't know") {
+        await makeFinalGuess();
+      } else {
+        setTimeout(askGeminiQuestion, 600);
+      }
     }
 
     async function makeFinalGuess() {
+      document.getElementById('question').textContent = '🤖 AI Making Final Guess...';
+      
       try {
-        const prompt = `Akinator FINAL GUESS. Based on these answers: ${JSON.stringify(answersHistory)}.
-        Who is the famous person? Pakistani/Global - Cricketer/Actor/Politician/Musician.
-        Respond ONLY with: "NAME OF PERSON"`;
-        
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`, {
+        const prompt = `Akinator FINAL GUESS. Based EXACTLY on these answers: ${JSON.stringify(answersHistory)}.
+        Famous person name ONLY (cricketer/actor/politician - Pakistan/global).
+        Example: "Babar Azam" or "Shah Rukh Khan". NO extra text.`;
+
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }]
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { temperature: 0.1, maxOutputTokens: 20 }
           })
         });
-        
+
         const data = await response.json();
         const guess = data.candidates[0].content.parts[0].text.trim();
         
         showGuess(guess);
         
       } catch (error) {
-        showGuess("I couldn't guess! 😅");
+        showGuess("Couldn't guess! You win! 😎");
       }
     }
 
@@ -166,20 +236,25 @@
       document.getElementById('game-screen').style.display = 'none';
       document.getElementById('guess-screen').style.display = 'block';
       
-      // Unsplash Image API - REAL PHOTOS!
-      const imgUrl = `https://source.unsplash.com/200x200/?${name.replace(' ', '+')}`;
-      document.getElementById('character-img').src = imgUrl;
-      document.getElementById('character-img').onerror = () => {
-        document.getElementById('character-img').src = `https://via.placeholder.com/200x200/667eea/ffffff?text=${name.substring(0,1)}`;
+      // Unsplash API - Real Celebrity Photos!
+      const cleanName = name.replace(/[^a-zA-Z\s]/g, '').toLowerCase().replace(/\s+/g, '+');
+      const imgUrl = `https://source.unsplash.com/200x200/?${cleanName}`;
+      
+      const img = document.getElementById('character-img');
+      img.src = imgUrl;
+      img.onerror = () => {
+        img.src = `https://via.placeholder.com/200x200/667eea/ffffff?text=${name.charAt(0)}`;
       };
       
       document.getElementById('character-name').textContent = name;
-      document.getElementById('guess-text').textContent = `Is it ${name}? 🎯`;
+      document.getElementById('guess-text').textContent = 
+        `Is it <strong>${name}</strong>? 🎯<br>
+         <small>(Unsplash API Photo | ${questionCount} questions)</small>`;
     }
 
     function updateProgress() {
-      progress = (answersHistory.length / 15) * 100;
-      document.getElementById('progress-bar').style.width = progress + '%';
+      const percent = Math.min((questionCount / MAX_QUESTIONS) * 100, 100);
+      document.getElementById('progress-bar').style.width = percent + '%';
     }
   </script>
 </body>
